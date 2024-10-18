@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>유사도 그래프</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <canvas id="similarityGraph" width="400" height="200"></canvas>
+    <script>
+        var ctx = document.getElementById('similarityGraph').getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['전화번호', '놀러가자', '사귈래', '사진'],
+                datasets: [{
+                    label: ['전화번호'],
+                    backgroundColor: ['rgb(75, 192, 192)', 'rgb(255, 99, 132)', 'rgb(54, 162, 235)', 'rgb(255, 205, 86)'],
+                    data: {{ similarities[0] }},
+                },
+                {
+                    label: ['놀러가자'],
+                    backgroundColor: 'rgb(255, 99, 132)',
+                    data: {{ similarities[1] }},
+                },
+                {
+                    label: ['사귈래'],
+                    backgroundColor: 'rgb(54, 162, 235)',
+                    data: {{ similarities[2] }},
+                }, 
+                {
+                    label: ['사진'],
+                    backgroundColor: 'rgb(255, 205, 86)',
+                    data: {{ similarities[3] }},
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: '유사도 비교 그래프',
+                },
+                scales: {
+                    x: {
+                        display: false,
+                    },
+                    y: {
+                        max: 100,
+                        min: 0,
+                    }
+                }
+            }
+        });
+
+        // 그래프 데이터를 가져와서 업데이트
+        function updateGraph() {
+            fetch('/get_graph_data', {
+                method: 'GET',
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.similarities.length > 0) {
+                    chart.data.datasets[0].data = data.similarities;
+                    chart.update();
+                }
+            });
+        }
+
+        // 초기에 그래프 업데이트
+        updateGraph();
+
+        // 주기적으로 그래프 업데이트 (예: 1초마다)
+        setInterval(updateGraph,1000);
+    </script>
+</body>
+</html>
